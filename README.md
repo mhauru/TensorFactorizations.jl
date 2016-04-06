@@ -10,6 +10,8 @@ decompositions of tensors.
 
 ## Exported functions
 
+#### `tensorsvd`
+
 ```julia
 tensorsvd(A, a, b;
           chis=nothing, eps=0,
@@ -54,12 +56,14 @@ singular values and `U` and `Vt` are isometric tensors (unitary if the matrix
 that is SVDed is square and there is no truncation) such that  `U*diag(S)*Vt =
 A`, up to truncation errors.
 
+#### `tensoreig
 
 ```julia
 tensoreig(A, a, b; chis=nothing, eps=0,
           return_error=false, print_error=false,
           break_degenerate=false, degeneracy_eps=1e-6,
-          norm_type=:frobenius, hermitian=false)
+          norm_type=:frobenius,
+          hermitian=false)
 ```
 Finds the "right" eigenvectors and eigenvalues of `A`. The indices of `A` are
 permuted so that the indices listed in the Array/Tuple `a` are on the "left"
@@ -82,6 +86,7 @@ U*diagm(E)*U'` up to the truncation error.
 Output is `E`, `U`, and possibly `error`, if `return_error=true`. Here `E` is a
 vector of eigenvalues values and `U[:,...,:,k]` is the kth eigenvector.
 
+#### `tensorsplit`
 
 ```julia
 tensorsplit(A, a, b; kwargs...)
