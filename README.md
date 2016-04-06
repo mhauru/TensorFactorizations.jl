@@ -56,7 +56,7 @@ singular values and `U` and `Vt` are isometric tensors (unitary if the matrix
 that is SVDed is square and there is no truncation) such that  `U*diag(S)*Vt =
 A`, up to truncation errors.
 
-#### `tensoreig
+#### `tensoreig`
 
 ```julia
 tensoreig(A, a, b; chis=nothing, eps=0,
