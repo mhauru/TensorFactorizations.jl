@@ -41,11 +41,11 @@ to be to be considered degenerate.
 difference between `A` and the decomposition, divided by the Frobenius norm of
 `A`.  This is the same thing as the 2-norm of the singular values that are
 truncated out, divided by the 2-norm of all the singular values. The other
-option is `:trace`, in which case a 1-norm is used in stead.
+option is `:trace`, in which case a 1-norm is used instead.
 
 If `print_error=true` the truncation error is printed. The default is `false`.
 
-If `return_error=true` then the relative truncation error is also returned.
+If `return_error=true` then the truncation error is also returned.
 The default is `false`.
 
 Note that no iterative techniques are used, which means choosing to truncate
@@ -59,7 +59,8 @@ A`, up to truncation errors.
 #### `tensoreig`
 
 ```julia
-tensoreig(A, a, b; chis=nothing, eps=0,
+tensoreig(A, a, b;
+          chis=nothing, eps=0,
           return_error=false, print_error=false,
           break_degenerate=false, degeneracy_eps=1e-6,
           norm_type=:frobenius,
@@ -68,15 +69,15 @@ tensoreig(A, a, b; chis=nothing, eps=0,
 Finds the "right" eigenvectors and eigenvalues of `A`. The indices of `A` are
 permuted so that the indices listed in the Array/Tuple `a` are on the "left"
 side and indices listed in `b` are on the "right".  The resulting tensor is
-then `reshape`d to a matrix, and eig is called on this matrix to get the vector
-of eigenvalues `E` and matrix of eigenvectors `U`. Finally, `U` is reshaped to
-a tensor that has as its last index the one that enumerates the eigenvectors
-and the indices in `a` as its first indices.
+then `reshape`d to a matrix, and `eig` is called on this matrix to get the
+vector of eigenvalues `E` and matrix of eigenvectors `U`. Finally, `U` is
+reshaped to a tensor that has as its last index the one that enumerates the
+eigenvectors and the indices in `a` as its first indices.
 
 Truncation and error printing work as with `tensorsvd`.
 
 Note that no iterative techniques are used, which means that choosing to
-truncate provides no performance benefits: The all the eigenvalues are computed
+truncate provides no performance benefits: All the eigenvalues are computed
 in any case.
 
 The keyword argument `hermitian` (`false` by default) tells the algorithm

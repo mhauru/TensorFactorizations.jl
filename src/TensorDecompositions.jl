@@ -65,7 +65,7 @@ and the indices in `a` as its first indices.
 Truncation and error printing work as with `tensorsvd`.
 
 Note that no iterative techniques are used, which means that choosing to
-truncate provides no performance benefits: The all the eigenvalues are computed
+truncate provides no performance benefits: All the eigenvalues are computed
 in any case.
 
 The keyword argument `hermitian` (`false` by default) tells the algorithm
@@ -146,11 +146,11 @@ to be to be considered degenerate.
 difference between `A` and the decomposition, divided by the Frobenius norm of
 `A`.  This is the same thing as the 2-norm of the singular values that are
 truncated out, divided by the 2-norm of all the singular values. The other
-option is `:trace`, in which case a 1-norm is used in stead.
+option is `:trace`, in which case a 1-norm is used instead.
 
 If `print_error=true` the truncation error is printed. The default is `false`.
 
-If `return_error=true` then the relative truncation error is also returned.
+If `return_error=true` then the truncation error is also returned.
 The default is `false`.
 
 Note that no iterative techniques are used, which means choosing to truncate
