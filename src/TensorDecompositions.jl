@@ -82,7 +82,7 @@ function tensoreig(A, a, b; chis=nothing, eps=0, return_error=false,
     # Create the matrix and decompose it.
     A, shp_a, shp_b = to_matrix(A, a, b; return_tensor_shape=true)
     if hermitian
-        A = Hermitian(A)
+        A = Hermitian((A+A')/2)
     end
     fact = eigfact(A)
     E, U = fact[:values], fact[:vectors]
