@@ -5,7 +5,7 @@
 TensorFactorizations is a Julia library for eigenvalue and singular value
 decompositions of tensors.
 
-## Installing
+## Installation
 `Pkg.clone("git://github.com/mhauru/TensorFactorizations.jl.git")`
 
 ## Exported functions
