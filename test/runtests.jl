@@ -32,7 +32,10 @@ end
 
 """ Generate a random tensor, either with a given or a random shape. """
 function rtensor(;shape=nothing, n=nothing, chi=nothing,
-                 nlow=0, nhigh=5, chilow=0, chihigh=6, dtype=Complex128)
+                 nlow=0, nhigh=5, chilow=0, chihigh=6, dtype=nothing)
+    if dtype == nothing
+        dtype = rand([Int, Float64, Complex128])
+    end
     if shape == nothing
         shape = rshape(n=n, chi=chi, nlow=nlow, nhigh=nhigh, chilow=chilow,
                        chihigh=chihigh)
@@ -104,9 +107,7 @@ function test_eig()
     max_chi = rand(1:max_dim)
     chis = 1:max_chi
     E, U, error = tensoreig(A, ins, outs, eps=eps, chis=chis,
-                            return_error=true)
-    # This test could fail if there were degenerate singular values. We assume
-    # this is not the case because the tensors are random.
+                            return_error=true, break_degenerate=true)
     @test (error<eps || length(E) == max_chi)
     A_contract_list = collect(repeated(0, n))
     for (k,i) in enumerate(ins)
