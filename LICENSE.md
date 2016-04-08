@@ -1,4 +1,4 @@
-The TensorDecompositions.jl package is licensed under the MIT "Expat" License:
+The TensorFactorizations.jl package is licensed under the MIT "Expat" License:
 
 > Copyright (c) 2016: Markus Hauru.
 >

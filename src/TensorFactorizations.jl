@@ -1,4 +1,4 @@
-module TensorDecompositions
+module TensorFactorizations
 using TensorOperations
 export tensorsvd, tensoreig, tensorsplit
 

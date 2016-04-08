@@ -1,5 +1,5 @@
 using Base.Test
-using TensorDecompositions
+using TensorFactorizations
 using TensorOperations
 using ArgParse
 

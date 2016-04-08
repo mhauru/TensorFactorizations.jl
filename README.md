@@ -1,12 +1,12 @@
-# TensorDecompositions
+# TensorFactorizations
 
-[![Build Status](https://travis-ci.org/mhauru/TensorDecompositions.jl.svg?branch=master)](https://travis-ci.org/mhauru/TensorDecompositions.jl)
+[![Build Status](https://travis-ci.org/mhauru/TensorFactorizations.jl.svg?branch=master)](https://travis-ci.org/mhauru/TensorFactorizations.jl)
 
-TensorDecompositoins is a Julia library for eigenvalue and singular value
+TensorFactorizations is a Julia library for eigenvalue and singular value
 decompositions of tensors.
 
 ## Installing
-`Pkg.clone("git://github.com/mhauru/TensorDecompositions.jl.git")`
+`Pkg.clone("git://github.com/mhauru/TensorFactorizations.jl.git")`
 
 ## Exported functions
 
