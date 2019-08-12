@@ -1,7 +1,9 @@
-using Base.Test
+using Test
 using TensorFactorizations
 using TensorOperations
+using Random
 using ArgParse
+using LinearAlgebra
 
 
 function parse_pars()
@@ -25,7 +27,7 @@ function rshape(;n=nothing, chi=nothing, nlow=0, nhigh=5, chilow=1, chihigh=5)
     # n is the number of legs, chi is the bond dimension(s)
     n == nothing && (n = rand(nlow:nhigh))
     shape = (chi == nothing ? rand(chilow:chihigh, (n,))
-                            : collect(repeated(chi, n)))
+             : collect(repeat([chi], n)))
     return shape 
 end
 
@@ -34,13 +36,13 @@ end
 function rtensor(;shape=nothing, n=nothing, chi=nothing,
                  nlow=0, nhigh=5, chilow=0, chihigh=6, dtype=nothing)
     if dtype == nothing
-        dtype = rand([Int, Float64, Complex128])
+        dtype = rand([Int, Float64, Complex{Float64}])
     end
     if shape == nothing
         shape = rshape(n=n, chi=chi, nlow=nlow, nhigh=nhigh, chilow=chilow,
                        chihigh=chihigh)
     end
-    A = rand(dtype, (shape...))
+    A = rand(dtype, (shape...),)
     return A
 end
 
@@ -57,7 +59,7 @@ function test_svd()
 
     # SVD and reconstruct without truncation
     U, S, Vt = tensorsvd(A, ins, outs)
-    US = tensorcontract(U, [-1*(1:I); 1], diagm(S), [1,-I-1])
+    US = tensorcontract(U, [-1*(1:I); 1], Diagonal(S), [1,-I-1])
     Areco = tensorcontract(US, [-1*(1:I); 1], Vt, [1; -1*(I+1:n)])
     Areco = tensorcopy(Areco, collect(1:ndims(Areco)), invperm(perm))
     @test isapprox(A, Areco)
@@ -74,11 +76,11 @@ function test_svd()
     # This test could fail if there were degenerate singular values. We assume
     # this is not the case because the tensors are random.
     @test (error<eps || length(S) == max_chi)
-    US = tensorcontract(U, [-1*(1:I); 1], diagm(S), [1,-I-1])
+    US = tensorcontract(U, [-1*(1:I); 1], Diagonal(S), [1,-I-1])
     Areco = tensorcontract(US, [-1*(1:I); 1], Vt, [1; -1*(I+1:n)])
     Areco = tensorcopy(Areco, collect(1:ndims(Areco)), invperm(perm))
-    Anorm = vecnorm(A)
-    true_error = Anorm > 0 ? vecnorm(Areco - A)/Anorm : vecnorm(Areco)
+    Anorm = norm(A)
+    true_error = Anorm > 0 ? norm(Areco - A)/Anorm : norm(Areco)
     @test isapprox(error, true_error; atol=1e-8)
 end
 
@@ -96,7 +98,7 @@ function test_eig()
     for (o,i) in zip(outs, ins)
         shp[o] = shp[i]
     end
-    shp = (shp...)
+    shp = (shp...,)
     A = rtensor(shape=shp)
 
     # Check that eigenvectors really are eigenvectors
@@ -109,7 +111,7 @@ function test_eig()
     E, U, error = tensoreig(A, ins, outs, eps=eps, chis=chis,
                             return_error=true, break_degenerate=true)
     @test (error<eps || length(E) == max_chi)
-    A_contract_list = collect(repeated(0, n))
+    A_contract_list = collect(repeat([0], n))
     for (k,i) in enumerate(ins)
         A_contract_list[i] = -k
     end
@@ -118,7 +120,7 @@ function test_eig()
     end
     AU = tensorcontract(A, A_contract_list, U, [1:I; -(n+1)],
                         [-1*(1:I); -(n+1)])
-    UE = tensorcontract(U, [-1*(1:I); 1], diagm(E), [1; -(n+1)],
+    UE = tensorcontract(U, [-1*(1:I); 1], Diagonal(E), [1; -(n+1)],
                         [-1*(1:I); -(n+1)])
     @test isapprox(AU, UE)
 
@@ -134,7 +136,7 @@ function test_eig()
     for (o,i) in zip(outs, ins)
         shp[o] = shp[i]
     end
-    shp = (shp...)
+    shp = (shp...,)
     A = rtensor(shape=shp)
     # Make Hermitian
     hperm = collect(1:n)
@@ -146,7 +148,7 @@ function test_eig()
 
     # Decompose and reconstruct without truncation
     E, U = tensoreig(A, ins, outs, hermitian=true)
-    UE = tensorcontract(U, [-1*(1:I); 1], diagm(E), [1,-I-1])
+    UE = tensorcontract(U, [-1*(1:I); 1], Diagonal(E), [1,-I-1])
     Areco = tensorcontract(UE, [-1*(1:I); 1], conj(U), [-1*(I+1:n); 1])
     Areco = tensorcopy(Areco, collect(1:ndims(Areco)), invperm(perm))
 
@@ -162,11 +164,11 @@ function test_eig()
     # This test could fail if there were degenerate singular values. We assume
     # this is not the case because the tensors are random.
     @test (error<eps || length(E) == max_chi)
-    UE = tensorcontract(U, [-1*(1:I); 1], diagm(E), [1,-I-1])
+    UE = tensorcontract(U, [-1*(1:I); 1], Diagonal(E), [1,-I-1])
     Areco = tensorcontract(UE, [-1*(1:I); 1], conj(U), [-1*(I+1:n); 1])
     Areco = tensorcopy(Areco, collect(1:ndims(Areco)), invperm(perm))
-    Anorm = vecnorm(A)
-    true_error = Anorm > 0 ? vecnorm(Areco - A)/Anorm : vecnorm(Areco)
+    Anorm = norm(A)
+    true_error = Anorm > 0 ? norm(Areco - A)/Anorm : norm(Areco)
     @test isapprox(error, true_error; atol=1e-8)
 end
 
@@ -184,7 +186,7 @@ function test_split()
 
     B1, B2 = tensorsplit(A, ins, outs)
     U, S, Vt = tensorsvd(A, ins, outs)
-    Ssqrt = diagm(sqrt(S))
+    Ssqrt = Diagonal(sqrt.(S))
     B1reco = tensorcontract(U, [-1*(1:I); 1], Ssqrt, [1, -n-1])
     B2reco = tensorcontract(Ssqrt, [-1,1], Vt, [1; -1*(2:J+1)])
     @test isapprox(B1reco, B1)
@@ -202,7 +204,7 @@ function test_split()
     for (o,i) in zip(outs, ins)
         shp[o] = shp[i]
     end
-    shp = (shp...)
+    shp = (shp...,)
     A = rtensor(shape=shp)
     # Make Hermitian
     hperm = collect(1:n)
@@ -214,7 +216,7 @@ function test_split()
 
     B1, B2 = tensorsplit(A, ins, outs, hermitian=true)
     E, U = tensoreig(A, ins, outs, hermitian=true)
-    Esqrt = diagm(sqrt(complex(E)))
+    Esqrt = Diagonal(sqrt.(complex.(E)))
     B1reco = tensorcontract(U, [-1*(1:I); 1], Esqrt, [1, -n-1])
     B2reco = tensorcontract(Esqrt, [-1,1], conj(U), [-1*(2:I+1); 1])
     @test isapprox(B1reco, B1)

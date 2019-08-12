@@ -1,5 +1,6 @@
 module TensorFactorizations
 using TensorOperations
+using LinearAlgebra
 export tensorsvd, tensoreig, tensorsplit
 
 
@@ -32,7 +33,7 @@ function tensorsplit(args...; kwargs...)
         Vt = conj!(tensorcopy(U, collect(1:ndims(U)), Vt_perm))
         S = Diagonal(S)
         if !isposdef(S)
-            S = complex(S)
+            S = complex.(S)
         end
         auxdata = res[3:end]
     else
@@ -41,7 +42,7 @@ function tensorsplit(args...; kwargs...)
         S = Diagonal(S)
         auxdata = res[4:end]
     end
-    S_sqrt = sqrt(S)
+    S_sqrt = sqrt.(S)
     A1 = tensorcontract(U, (1:ndims(U)-1..., :a), S_sqrt, (:a, :b))
     A2 = tensorcontract(S_sqrt, (:b, :a), Vt, (:a, 1:ndims(Vt)-1...))
     return A1, A2, auxdata...
@@ -84,10 +85,10 @@ function tensoreig(A, a, b; chis=nothing, eps=0, return_error=false,
     if hermitian
         A = Hermitian((A+A')/2)
     end
-    fact = eigfact(A)
-    E, U = fact[:values], fact[:vectors]
+    fact = eigen(A)
+    E, U = fact.values, fact.vectors
     # Sort the by largest magnitude eigenvalue first.
-    perm = sortperm(abs(E), rev=true)
+    perm = sortperm(abs.(E), rev=true)
     if perm != collect(1:length(E))
         E = E[perm]
         U = U[:,perm]
@@ -166,8 +167,8 @@ function tensorsvd(A, a, b; chis=nothing, eps=0, return_error=false,
                    degeneracy_eps=1e-6, norm_type=:frobenius)
     # Create the matrix and SVD it.
     A, shp_a, shp_b = to_matrix(A, a, b; return_tensor_shape=true)
-    fact = svdfact(A)
-    U, S, Vt = fact[:U], fact[:S], fact[:Vt]
+    fact = svd(A)
+    U, S, Vt = fact.U, fact.S, fact.Vt
 
     # Find the dimensions to truncate to and the error caused in doing so.
     chi, error = find_trunc_dim(S, chis, eps, break_degenerate, degeneracy_eps,
@@ -291,7 +292,7 @@ function find_trunc_dim(v, chis, eps,
                         norm_type=:frobenius)
     # Put chis in a standard format.
     chis = format_trunc_chis(v, chis, eps)
-    v = abs(v)
+    v = abs.(v)
     if !issorted(v, rev=true)
         sort!(v, rev=true)
     end
@@ -308,7 +309,8 @@ function find_trunc_dim(v, chis, eps,
     # Find the smallest chi for which the error is small enough.
     # If none is found, use the largest chi.
     if sum_all != 0
-        for chi in chis
+        for i in 1:length(chis)
+            chi = chis[i]
             if !break_degenerate
                 # Make sure that we don't break degenerate singular values by
                 # including one but not the other by decreasing chi if
